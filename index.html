@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>UniSIR: A Unified Representation for Driving-Scene Synthesis</title>
+<title>UniSIR: A Unified Scene Intermediate Representation for Driving-Scene Synthesis</title>
 <meta name="description" content="UniSIR defines one scene representation that image, video and occupancy driving-scene generators all accept, compiled into each backend's native conditioning with no training.">
-<meta property="og:title" content="UniSIR: A Unified Representation for Driving-Scene Synthesis">
+<meta property="og:title" content="UniSIR: A Unified Scene Intermediate Representation for Driving-Scene Synthesis">
 <meta property="og:description" content="One scene representation, three driving-scene backends, no training.">
 <meta property="og:image" content="static/images/teaser.jpg">
 <link rel="stylesheet" href="static/css/style.css">
@@ -15,7 +15,7 @@
 
   <!-- ============================================================ hero -->
   <header class="hero">
-    <h1>UniSIR: A Unified Representation<br>for Driving-Scene Synthesis</h1>
+    <h1>UniSIR: A Unified Scene Intermediate Representation<br>for Driving-Scene Synthesis</h1>
     <p class="authors">Anonymous submission</p>
     <p class="affil">IEEE Intelligent Vehicles Symposium (IV) 2027</p>
 
@@ -49,13 +49,13 @@
       Driving-scene generators each consume their own conditioning: an image generator a rasterised
       bird's-eye-view map with projected boxes, a video generator a multi-view clip with a rendered HD
       map, an occupancy generator a voxelised layout. The scene a practitioner already has seldom
-      arrives in any of these forms. We define UniSIR, one scene representation, translate inputs of
-      different types into it, namely annotations, simulator files, or a sentence, and compile it into
-      a backend's native conditioning through a small adapter. Because the representation is plugged
-      into the interfaces the backends were trained on rather than replacing them, the question we can
-      answer is whether the adapter costs anything, and we answer it by measurement rather than
-      assertion: across an image, a video and an occupancy generator, the compiled conditioning is not
-      worse than each model's own. Code and adapters are released.
+      arrives in any of these forms. We define UniSIR, a unified scene intermediate representation,
+      translate inputs of different types &mdash; annotations, simulator files, or a sentence &mdash;
+      and compile it into a backend's native conditioning through a small adapter. Because the
+      representation is plugged into the interfaces the backends were trained on rather than replacing
+      them, the question we can answer is whether the adapter costs anything, and we answer it by
+      measurement rather than assertion: across the image, video and occupancy generators, the compiled
+      conditioning is not worse than each model's own.
     </p>
   </section>
 
@@ -112,53 +112,54 @@
 
     <h3>1. Long-tail scenarios, rendered end to end</h3>
     <p class="note">
-      Each clip is 20 frames at 4&nbsp;fps across six views, rendered by the video backend from a single
-      document. None of the scenes exists in the dataset: they are constructed, simulated, checked for
-      clearance, and then rendered.
+      Each clip is 20&ndash;25 frames at 4&nbsp;fps across six views, rendered by the video
+      backend from a single document. None of the scenes exists in the dataset: they are
+      constructed, simulated, checked for clearance, and then rendered.
     </p>
 
     <div class="grid one">
       <figure class="card">
-        <a href="static/videos/vid1.mp4" target="_blank" rel="noopener">
-          <video src="static/videos/vid1.mp4" poster="static/images/vid1.jpg" autoplay loop muted playsinline></video>
-        </a>
-        <p class="cap"><b>Snow, occluded crossing.</b> A pedestrian crosses behind a stopped vehicle.</p>
-      </figure>
-
-      <figure class="card">
         <a href="static/videos/vid2.mp4" target="_blank" rel="noopener">
           <video src="static/videos/vid2.mp4" poster="static/images/vid2.jpg" autoplay loop muted playsinline></video>
         </a>
-        <p class="cap"><b>Rain, truck cut-in.</b> A truck cuts into the ego lane at close range.</p>
+        <p class="cap"><b>Heavy rain, dusk.</b> A stopped box truck forces a cut-in at close range. Smallest body-to-body gap 1.30&nbsp;m.</p>
       </figure>
 
       <figure class="card">
         <a href="static/videos/vid3.mp4" target="_blank" rel="noopener">
           <video src="static/videos/vid3.mp4" poster="static/images/vid3.jpg" autoplay loop muted playsinline></video>
         </a>
-        <p class="cap"><b>Fog, oncoming drift.</b> An oncoming car drifts across the centre line.</p>
+        <p class="cap"><b>Dense fog.</b> An oncoming vehicle crosses the centre line. Smallest body-to-body gap 1.30&nbsp;m.</p>
       </figure>
 
       <figure class="card">
         <a href="static/videos/vid4.mp4" target="_blank" rel="noopener">
           <video src="static/videos/vid4.mp4" poster="static/images/vid4.jpg" autoplay loop muted playsinline></video>
         </a>
-        <p class="cap"><b>Night, squeeze.</b> The ego is boxed in on both sides at night.</p>
+        <p class="cap"><b>Rainy night.</b> Squeezed between two vehicles with no escape gap. Smallest body-to-body gap 1.52&nbsp;m.</p>
       </figure>
 
       <figure class="card">
-        <a href="static/videos/vid7.mp4" target="_blank" rel="noopener">
-          <video src="static/videos/vid7.mp4" poster="static/images/vid7.jpg" autoplay loop muted playsinline></video>
+        <a href="static/videos/vid5.mp4" target="_blank" rel="noopener">
+          <video src="static/videos/vid5.mp4" poster="static/images/vid5.jpg" autoplay loop muted playsinline></video>
         </a>
-        <p class="cap"><b>Clear, pedestrian after.</b> A pedestrian steps out just after the ego passes.</p>
+        <p class="cap"><b>Dusk, into low sun.</b> A pedestrian crosses fast, at close range. Smallest body-to-body gap 1.40&nbsp;m.</p>
       </figure>
 
       <figure class="card">
-        <a href="static/videos/vid10.mp4" target="_blank" rel="noopener">
-          <video src="static/videos/vid10.mp4" poster="static/images/vid10.jpg" autoplay loop muted playsinline></video>
+        <a href="static/videos/vid8.mp4" target="_blank" rel="noopener">
+          <video src="static/videos/vid8.mp4" poster="static/images/vid8.jpg" autoplay loop muted playsinline></video>
         </a>
-        <p class="cap"><b>Dusk, slow crossing.</b> A slow crossing at dusk, low sun ahead.</p>
+        <p class="cap"><b>Rain.</b> An oncoming car drifts over the line three seconds out. Smallest body-to-body gap 1.30&nbsp;m.</p>
       </figure>
+
+      <figure class="card">
+        <a href="static/videos/vid9.mp4" target="_blank" rel="noopener">
+          <video src="static/videos/vid9.mp4" poster="static/images/vid9.jpg" autoplay loop muted playsinline></video>
+        </a>
+        <p class="cap"><b>Fog.</b> A slow merge at 35&nbsp;km/h, 18&nbsp;m behind the vehicle ahead. Smallest body-to-body gap 1.30&nbsp;m.</p>
+      </figure>
+
     </div>
 
     <h3>2. The image backend, on the same documents</h3>
@@ -214,150 +215,22 @@
       </figure>
     </div>
 
-    <h3>4. Parity with the native conditioning</h3>
-    <p>
-      Only the map channel differs between the two arms; the frames, the seeds and the evaluators are
-      the same. Image quality is statistically indistinguishable on all six cameras, and detection is
-      slightly better, which is what we mean by the adapter costing nothing measurable.
-    </p>
-
-    <div class="tablewrap narrow">
-    <table>
-      <caption>
-        Table I. Parity against each backend's own native conditioning. Every KID carries a 95&#8239;%
-        bootstrap interval and all six per-camera pairs overlap; the paired bootstrap puts the mean
-        difference at +0.0009 with zero inside all six intervals.
-      </caption>
-      <thead>
-        <tr><th></th><th>Native</th><th>UniSIR</th></tr>
-      </thead>
-      <tbody>
-        <tr class="panel"><td colspan="3">A. Image quality &mdash; KID &darr;, n&nbsp;=&nbsp;150</td></tr>
-        <tr><td>CAM_FRONT</td><td>0.0216</td><td>0.0229</td></tr>
-        <tr><td>CAM_FRONT_LEFT</td><td>0.0151</td><td>0.0159</td></tr>
-        <tr><td>CAM_FRONT_RIGHT</td><td>0.0151</td><td>0.0161</td></tr>
-        <tr><td>CAM_BACK</td><td>0.0276</td><td>0.0286</td></tr>
-        <tr><td>CAM_BACK_LEFT</td><td>0.0164</td><td>0.0172</td></tr>
-        <tr><td>CAM_BACK_RIGHT</td><td>0.0229</td><td>0.0237</td></tr>
-        <tr class="panel"><td colspan="3">B. Perception &mdash; frozen BEVFormer, n&nbsp;=&nbsp;150</td></tr>
-        <tr><td>mAP &uarr;</td><td>0.1110</td><td>0.1197</td></tr>
-        <tr><td>NDS &uarr;</td><td>0.1829</td><td>0.1880</td></tr>
-        <tr class="panel"><td colspan="3">C. Occupancy &mdash; UniScene, 6012 frames</td></tr>
-        <tr><td>Occ3D mIoU &uarr;</td><td colspan="2">14.54</td></tr>
-      </tbody>
-    </table>
-    </div>
-
-    <h3>5. The generated dataset against a real-data ceiling</h3>
-    <p>
-      Both rows are measured through the identical protocol, against a real reference that has been
-      through the same crop-and-reconstruct as the generated frames. The compiled set is closer to
-      real data than a matched real-vs-real sample is to itself, and the ordering does not change when
-      the comparison is repeated against a smaller reference.
-    </p>
-
-    <div class="tablewrap">
-      <table>
-        <caption>
-          Table II. Panel A: all 6012 frames against a 6000-frame real reference. KID and FID are
-          means over the six cameras; road and vehicle are CVT IoU at 0.40 and 0.50.
-        </caption>
-        <thead>
-          <tr>
-            <th>A. Full set</th><th>FID &darr;</th><th>KID &darr;</th><th>Road &uarr;</th>
-            <th>Veh. &uarr;</th><th>mAP &uarr;</th><th>NDS &uarr;</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>Real, this protocol</td><td>58.49</td><td>0.0161</td><td>61.82</td><td>31.63</td><td>38.59</td><td>49.55</td></tr>
-          <tr><td>Ours, image</td><td>34.82</td><td><b>0.0120</b></td><td>46.91</td><td>23.08</td><td><b>15.82</b></td><td><b>21.53</b></td></tr>
-          <tr><td>Ours, video</td><td>84.87</td><td>0.0526</td><td>33.19</td><td>&ndash;</td><td>1.01</td><td>5.57</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="tablewrap narrow">
-      <table>
-        <caption>
-          Table II (continued). Panel B: 150 frames per view against a 300-frame real reference, the
-          sample size at which a conditioning artefact would show first.
-        </caption>
-        <thead>
-          <tr><th>B. Small sample</th><th>FID &darr;</th><th>KID &darr;</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Real vs. real, floor</td><td>151.2</td><td>0.0330</td></tr>
-          <tr><td>Ours, image</td><td><b>125.5</b></td><td><b>0.0183</b></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p class="note">
-      Panel A's reference row is our real-data ceiling, not the published oracle: every row has been
-      through the same crop-and-reconstruct, which costs about ten points of road IoU and five of
-      vehicle IoU relative to full-resolution validation. In panel B the two KID ranges &mdash; ours
-      0.0139&ndash;0.0250, floor 0.0261&ndash;0.0455 &mdash; do not overlap on any camera. Vehicle IoU
-      is not reported for the video row because the CVT vehicle checkpoint was not run for that
-      branch; nothing here is extrapolated. Occupancy is scored in voxel space by UniScene's own
-      evaluator and therefore cannot occupy an image-space column: the compiled layout reaches 14.54
-      Occ3D mIoU over the same 6012 frames (14.40 on a deterministic-window re-run).
-    </p>
-
-    <h3>6. What each input family can supply</h3>
-    <p>
-      Rows are inputs, not ablations: a zero is a property of the input, not of the adapter. A map
-      alone or a sentence alone renders a plausible frame that contains no detectable actor, which is
-      what the document's modality mask warns about before anything is compiled.
-    </p>
-
-    <div class="tablewrap">
-      <table>
-        <caption>
-          Table III. Input families through the same adapters, 150 frames. Annotations are the
-          reference.
-        </caption>
-        <thead>
-          <tr>
-            <th rowspan="2">Input</th>
-            <th colspan="2">Image backend</th>
-            <th colspan="2">Video backend</th>
-          </tr>
-          <tr>
-            <th>KID &darr;</th><th>mAP &uarr;</th><th>KID &darr;</th><th>mAP &uarr;</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>Annotations (map + actors)</td><td>0.0183</td><td><b>0.1197</b></td><td>0.0573</td><td><b>0.0149</b></td></tr>
-          <tr><td>Map + boxes (fused)</td><td>0.0340</td><td>0.0484</td><td>0.0736</td><td>0.0071</td></tr>
-          <tr><td>Actors only</td><td>0.0367</td><td>0.0381</td><td>0.0522</td><td>0.0087</td></tr>
-          <tr><td>Map only</td><td>0.0998</td><td>0.0000</td><td>0.1228</td><td>0.0000</td></tr>
-          <tr><td>Text only</td><td>0.0562</td><td>0.0000</td><td>0.1290</td><td>0.0000</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p class="note">
-      What the families can supply, measured against annotations on 600 frames: OpenDRIVE fills the
-      map at 0.749 IoU of the rasterised reference and no actors; OpenSCENARIO fills every actor
-      (median centre error 0.007&nbsp;m) and no map; short text recovers 5.3&#8239;% of the actors at a
-      median error of 32&nbsp;m.
-    </p>
-
-    <h3>7. Qualitative results</h3>
+    <h3>4. Qualitative results</h3>
     <p>
       The representation can also be used to construct scenes rather than translate them: a conflict
       is specified, simulated, written as a document, and rendered by whichever backend is available.
-      The figure shows what that produces, with the body-to-body clearance at the closest frame.
+      Four of the panels below are frames of the video backend's clip; the fifth is the image backend's
+      still of the same scene. The number on each panel is the smallest body-to-body gap that clip
+      reaches.
     </p>
     <figure>
       <img src="static/images/longtail.png"
-           alt="Six constructed long-tail scenes, each annotated with the clearance at the closest frame">
+           alt="Five constructed long-tail scenes, each annotated with the smallest body-to-body gap of its clip">
       <figcaption>
-        <b>Constructed, not collected.</b> A pedestrian crossing behind a hoarding in snow (0.67&nbsp;m);
-        a truck cutting in on wet road (1.30&nbsp;m); an oncoming vehicle drifting over the centre line
-        in fog (1.30&nbsp;m); a coned-off lane squeeze at night (1.52&nbsp;m); a pedestrian in dusk
-        (1.40&nbsp;m); a pedestrian who enters the ego lane after the ego has passed (0.57&nbsp;m). No
-        recording exists behind any of these frames.
+        <b>Constructed, not collected.</b> A truck cutting in on a wet road (1.30&nbsp;m); an oncoming
+        vehicle over the centre line in dense fog (1.30&nbsp;m); a night squeeze with no escape gap
+        (1.52&nbsp;m); a slow crossing at dusk (1.21&nbsp;m); a pedestrian who enters the ego lane after
+        the ego has passed (0.57&nbsp;m). No recording exists behind any of these frames.
       </figcaption>
     </figure>
   </section>
