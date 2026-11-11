@@ -226,6 +226,7 @@
       slightly better, which is what we mean by the adapter costing nothing measurable.
     </p>
 
+    <div class="tablewrap narrow">
     <table>
       <caption>
         Table I. Parity against each backend's own native conditioning. Every KID carries a 95&#8239;%
@@ -250,8 +251,105 @@
         <tr><td>Occ3D mIoU &uarr;</td><td colspan="2">14.54</td></tr>
       </tbody>
     </table>
+    </div>
 
-    <h3>5. Where the scenarios come from</h3>
+    <h3>5. The generated dataset against a real-data ceiling</h3>
+    <p>
+      Both rows are measured through the identical protocol, against a real reference that has been
+      through the same crop-and-reconstruct as the generated frames. On the full 6012 frames the
+      compiled set is closer to real data than a matched real-vs-real sample is to itself, and it
+      stays closer at 150 frames per view, so the result does not depend on the sample size at which
+      it is measured.
+    </p>
+
+    <div class="tablewrap">
+      <table>
+        <caption>
+          Table II. Panel A: all 6012 frames against a 6000-frame real reference. KID and FID are
+          means over the six cameras; road and vehicle are CVT IoU at 0.40 and 0.50.
+        </caption>
+        <thead>
+          <tr>
+            <th>A. Full set</th><th>FID &darr;</th><th>KID &darr;</th><th>Road &uarr;</th>
+            <th>Veh. &uarr;</th><th>mAP &uarr;</th><th>NDS &uarr;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Real, this protocol</td><td>58.49</td><td>0.0161</td><td>61.82</td><td>31.63</td><td>38.59</td><td>49.55</td></tr>
+          <tr><td>Ours, image</td><td>34.82</td><td><b>0.0120</b></td><td>46.91</td><td>23.08</td><td><b>15.82</b></td><td><b>21.53</b></td></tr>
+          <tr><td>Ours, video</td><td>84.87</td><td>0.0526</td><td>33.19</td><td>&ndash;</td><td>1.01</td><td>5.57</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tablewrap narrow">
+      <table>
+        <caption>
+          Table II (continued). Panel B: 150 frames per view against a 300-frame real reference, the
+          sample size at which a conditioning artefact would show first.
+        </caption>
+        <thead>
+          <tr><th>B. Small sample</th><th>FID &darr;</th><th>KID &darr;</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Real vs. real, floor</td><td>151.2</td><td>0.0330</td></tr>
+          <tr><td>Ours, image</td><td><b>125.5</b></td><td><b>0.0183</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="note">
+      Panel A's reference row is our real-data ceiling, not the published oracle: every row has been
+      through the same crop-and-reconstruct, which costs about ten points of road IoU and five of
+      vehicle IoU relative to full-resolution validation. In panel B the two KID ranges &mdash; ours
+      0.0139&ndash;0.0250, floor 0.0261&ndash;0.0455 &mdash; do not overlap on any camera. Vehicle IoU
+      is not reported for the video row because the CVT vehicle checkpoint was not run for that
+      branch; nothing here is extrapolated. Occupancy is scored in voxel space by UniScene's own
+      evaluator and therefore cannot occupy an image-space column: the compiled layout reaches 14.54
+      Occ3D mIoU over the same 6012 frames (14.40 on a deterministic-window re-run).
+    </p>
+
+    <h3>6. What each input family can supply</h3>
+    <p>
+      Rows are inputs, not ablations: a zero is a property of the input, not of the adapter. A map
+      alone or a sentence alone renders a plausible frame that contains no detectable actor, which is
+      what the document's modality mask warns about before anything is compiled.
+    </p>
+
+    <div class="tablewrap">
+      <table>
+        <caption>
+          Table III. Input families through the same adapters, 150 frames. Annotations are the
+          reference.
+        </caption>
+        <thead>
+          <tr>
+            <th rowspan="2">Input</th>
+            <th colspan="2">Image backend</th>
+            <th colspan="2">Video backend</th>
+          </tr>
+          <tr>
+            <th>KID &darr;</th><th>mAP &uarr;</th><th>KID &darr;</th><th>mAP &uarr;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Annotations (map + actors)</td><td>0.0183</td><td><b>0.1197</b></td><td>0.0573</td><td><b>0.0149</b></td></tr>
+          <tr><td>Map + boxes (fused)</td><td>0.0340</td><td>0.0484</td><td>0.0736</td><td>0.0071</td></tr>
+          <tr><td>Actors only</td><td>0.0367</td><td>0.0381</td><td>0.0522</td><td>0.0087</td></tr>
+          <tr><td>Map only</td><td>0.0998</td><td>0.0000</td><td>0.1228</td><td>0.0000</td></tr>
+          <tr><td>Text only</td><td>0.0562</td><td>0.0000</td><td>0.1290</td><td>0.0000</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="note">
+      What the families can supply, measured against annotations on 600 frames: OpenDRIVE fills the
+      map at 0.749 IoU of the rasterised reference and no actors; OpenSCENARIO fills every actor
+      (median centre error 0.007&nbsp;m) and no map; short text recovers 5.3&#8239;% of the actors at a
+      median error of 32&nbsp;m.
+    </p>
+
+    <h3>7. Where the scenarios come from</h3>
     <p>
       A conflict is specified in words, simulated with a traffic simulator, checked for clearance and
       heading, and written out as a document; the same document then renders in every backend. The

@@ -104,6 +104,9 @@ figcaption b { color: #4a4a4a; font-weight: 600; }
 .card .cap b { color: #4a4a4a; font-weight: 600; }
 
 /* ---------- table ---------- */
+.tablewrap { overflow-x: auto; margin: 0.4em 0 1em; }
+.tablewrap table { min-width: 620px; margin: 0; }
+.tablewrap.narrow table { max-width: 620px; }
 table { width: 100%; border-collapse: collapse; font-size: 0.93rem; margin: 0.4em 0 1em; }
 
 caption {

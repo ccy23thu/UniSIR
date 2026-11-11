@@ -37,7 +37,7 @@ site/
 | Abstract | `index.html`, section `#abstract` — it is the paper's abstract verbatim |
 | Method text | `index.html`, section `#method` (three short paragraphs) |
 | Captions, order of the results | `index.html`, section `#results`, one `<figure class="card">` per item |
-| Numbers in the table | `index.html`, the `<table>` in `#results` (mirrors Table I of the paper) |
+| Numbers in the tables | `index.html`, the four tables in `#results` (Tables I--III of the paper) |
 | BibTeX | `index.html`, section `#bibtex` |
 | Colours, widths, spacing | `static/css/style.css`, variables at the top |
 
@@ -81,4 +81,5 @@ python bin/check_site.py            # in the paper repository, against this fold
 
 Verifies that every local reference resolves, that the title and abstract on the page are character
 for character the paper's, that every image has alt text, and that a local HTTP server returns 200
-for all 27 URLs the page requests.
+for all 27 URLs the page requests. It also checks that every value in the paper's Tables II and III
+appears on the page, so a retyped number cannot drift.
