@@ -4,8 +4,12 @@ Static project page for *UniSIR: A Unified Representation for Driving-Scene Synt
 Layout follows the DriveDreamer / Nerfies project-page convention: title, authors, links, teaser,
 abstract, method, results (images and videos), BibTeX, footer.
 
-Everything here is plain HTML and CSS with no build step and no external dependencies, so GitHub
-Pages can serve the folder as it is.
+- **Live:** <https://ccy23thu.github.io/UniSIR/>
+- **Repository:** <https://github.com/ccy23thu/UniSIR>
+- **Served from:** branch `main`, folder `/ (root)`, via GitHub Pages (legacy build, `.nojekyll` set)
+
+Everything here is plain HTML and CSS with no build step and no external dependencies, so Pages
+serves the folder exactly as it is.
 
 ## Preview locally
 
@@ -14,7 +18,28 @@ python -m http.server 8099 -d site
 # then open http://127.0.0.1:8099/
 ```
 
-(Open `site/index.html` directly also works, but videos and relative paths behave better over HTTP.)
+(Opening `site/index.html` directly also works, but videos and relative paths behave better over
+HTTP.)
+
+## Updating the live page
+
+Edit whatever you like in this folder, then from the working directory above it:
+
+```powershell
+.\bin\site_push.ps1 -Message "what changed"
+.\bin\site_push.ps1                       # push an already-made commit
+```
+
+That script commits this folder and pushes it with the token kept in `tmp_view\gh_token.txt`; the
+token is sent as a one-shot HTTP header and never written into `.git/config`. Pages rebuilds in
+about a minute — check with:
+
+```powershell
+curl.exe -s https://api.github.com/repos/ccy23thu/UniSIR/pages
+# "status": "built"  -> the new commit is live
+```
+
+Deployment takes the last commit pushed, so if you push twice in a minute the second one wins.
 
 ## What is where
 
@@ -24,7 +49,7 @@ site/
   static/css/style.css       one stylesheet, no framework; colours are CSS variables at the top
   static/images/             9 stills (teaser, pipeline, long-tail figure, 5 cases, six-view)
   static/videos/             8 clips (6 long-tail scenarios, generated and recorded occupancy)
-  publish.ps1                one command to push this folder to a GitHub repo
+  publish.ps1                one command to publish this folder to a *new* GitHub repository
   .nojekyll                  serve the files as they are, without Jekyll
 ```
 
@@ -37,7 +62,7 @@ site/
 | Abstract | `index.html`, section `#abstract` — it is the paper's abstract verbatim |
 | Method text | `index.html`, section `#method` (three short paragraphs) |
 | Captions, order of the results | `index.html`, section `#results`, one `<figure class="card">` per item |
-| Numbers in the tables | `index.html`, the four tables in `#results` (Tables I--III of the paper) |
+| Numbers in the tables | `index.html`, the four tables in `#results` (Tables I–III of the paper) |
 | BibTeX | `index.html`, section `#bibtex` |
 | Colours, widths, spacing | `static/css/style.css`, variables at the top |
 
@@ -55,9 +80,7 @@ That script re-encodes the videos to 1280 px wide, writes posters from each grid
 resizes the figures. If you would rather drop in your own file, put it in `static/images/` or
 `static/videos/` and point the `<img src>` / `<video src>` at it — the CSS only assumes a file name.
 
-## Publish to GitHub Pages
-
-Create an empty repository on GitHub first (no README, no licence), then:
+## Publishing to a different repository
 
 ```powershell
 cd site
@@ -65,13 +88,7 @@ cd site
 ```
 
 The script initialises the repository if needed, commits everything and pushes to `main`. Then, once:
-
 **Settings → Pages → Source: Deploy from a branch → Branch: `main`, folder `/ (root)` → Save.**
-
-The page appears at `https://<user>.github.io/<repo>/` within a minute or two.
-
-If you would rather keep it in a repository you already have, push this folder as `docs/` and point
-Pages at `main` / `/docs`.
 
 ## Checks
 
