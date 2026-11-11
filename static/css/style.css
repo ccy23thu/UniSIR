@@ -1,0 +1,156 @@
+/* Project page for UniSIR.
+   Deliberately plain CSS, no framework: one column of 960 px, dark text on white, and a grid for the
+   media. Edit the variables below to restyle the whole page. */
+
+:root {
+  --ink: #363636;
+  --muted: #6b6b6b;
+  --line: #e8e8e8;
+  --bg: #ffffff;
+  --max: 960px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Noto Sans", "Helvetica Neue", Helvetica, Arial, "PingFang SC",
+               "Microsoft YaHei", sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page { max-width: var(--max); margin: 0 auto; padding: 0 22px 90px; }
+
+/* ---------- hero ---------- */
+.hero { padding-top: 56px; text-align: center; }
+
+h1 {
+  font-size: 2.15rem;
+  line-height: 1.25;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin: 0 0 18px;
+}
+
+.authors { font-size: 1.05rem; margin: 0 0 4px; }
+.affil { color: var(--muted); font-size: 0.95rem; margin: 0 0 22px; }
+
+.links {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0 0 34px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.42em 1.15em;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.92rem;
+  transition: opacity 0.15s ease;
+}
+.btn:hover { opacity: 0.82; }
+.btn.ghost { background: #fff; color: var(--ink); border: 1px solid #d5d5d5; }
+
+.lead { text-align: left; font-size: 1.02rem; color: #4a4a4a; margin: 26px 0 0; }
+
+/* ---------- sections ---------- */
+section { margin-top: 64px; }
+
+h2 {
+  font-size: 1.65rem;
+  font-weight: 650;
+  margin: 0 0 18px;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--line);
+}
+
+h3 { font-size: 1.15rem; font-weight: 650; margin: 38px 0 14px; }
+
+p { margin: 0 0 1.05em; }
+
+.note { font-size: 0.85rem; color: var(--muted); }
+
+/* ---------- media ---------- */
+figure { margin: 0; }
+
+figure img, figure video {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+}
+figure img { border: 1px solid var(--line); }
+
+figcaption { font-size: 0.88rem; color: var(--muted); margin-top: 0.6rem; text-align: left; }
+figcaption b { color: #4a4a4a; font-weight: 600; }
+
+.grid { display: grid; gap: 26px; }
+.grid.one { grid-template-columns: 1fr; }
+.grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.card { margin: 0; }
+.card .cap { font-size: 0.86rem; color: var(--muted); margin-top: 0.5rem; }
+.card .cap b { color: #4a4a4a; font-weight: 600; }
+
+/* ---------- table ---------- */
+table { width: 100%; border-collapse: collapse; font-size: 0.93rem; margin: 0.4em 0 1em; }
+
+caption {
+  caption-side: top;
+  text-align: left;
+  font-size: 0.88rem;
+  color: var(--muted);
+  padding-bottom: 0.5em;
+}
+
+th, td { padding: 0.42em 0.55em; border-bottom: 1px solid var(--line); text-align: right; }
+th:first-child, td:first-child { text-align: left; }
+thead th { font-weight: 600; color: #4a4a4a; }
+tbody tr:last-child td { border-bottom: none; }
+tr.panel td {
+  background: #fafafa;
+  color: #4a4a4a;
+  font-style: italic;
+  font-size: 0.88rem;
+  padding-top: 0.7em;
+}
+
+/* ---------- code ---------- */
+pre {
+  background: #f7f7f7;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+footer {
+  margin-top: 70px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.84rem;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  body { font-size: 16px; }
+  h1 { font-size: 1.6rem; }
+  .hero { padding-top: 36px; }
+  section { margin-top: 48px; }
+  .grid.two, .grid.three { grid-template-columns: 1fr; }
+}

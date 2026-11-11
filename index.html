@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UniSIR: A Unified Representation for Driving-Scene Synthesis</title>
+<meta name="description" content="UniSIR defines one scene representation that image, video and occupancy driving-scene generators all accept, compiled into each backend's native conditioning with no training.">
+<meta property="og:title" content="UniSIR: A Unified Representation for Driving-Scene Synthesis">
+<meta property="og:description" content="One scene representation, three driving-scene backends, no training.">
+<meta property="og:image" content="static/images/teaser.jpg">
+<link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+<div class="page">
+
+  <!-- ============================================================ hero -->
+  <header class="hero">
+    <h1>UniSIR: A Unified Representation<br>for Driving-Scene Synthesis</h1>
+    <p class="authors">Anonymous submission</p>
+    <p class="affil">IEEE Intelligent Vehicles Symposium (IV) 2027</p>
+
+    <p class="links">
+      <a class="btn" href="#">Paper (coming soon)</a>
+      <a class="btn ghost" href="#">arXiv (coming soon)</a>
+      <a class="btn ghost" href="#">Code (coming soon)</a>
+    </p>
+
+    <figure>
+      <img src="static/images/teaser.jpg" alt="Six camera views of a rain scene, rendered from one document">
+      <figcaption>
+        <b>One document, six views.</b> A truck cut-in in rain, rendered by the video backend from the
+        same representation the image and occupancy backends consume. No frame of it was recorded.
+      </figcaption>
+    </figure>
+
+    <p class="lead">
+      Driving-scene generators each consume their own conditioning: MagicDrive a rasterised
+      bird's-eye-view map with projected boxes, DriveDreamer2 a six-view clip with a rendered HD map,
+      UniScene a voxelised occupancy layout. UniSIR defines <em>one</em> representation that all three
+      accept, and translates whatever a practitioner already has &mdash; annotations, simulator files,
+      or a sentence &mdash; into it.
+    </p>
+  </header>
+
+  <!-- ============================================================ abstract -->
+  <section id="abstract">
+    <h2>Abstract</h2>
+    <p>
+      Driving-scene generators each consume their own conditioning. MagicDrive takes a rasterised
+      bird's-eye-view map with projected boxes, DriveDreamer2 a six-view clip with a rendered HD map,
+      UniScene a voxelised occupancy layout. The scene a practitioner already has seldom arrives in any
+      of these forms. We define UniSIR, one scene representation, translate inputs of different types
+      into it &mdash; annotations, simulator files, or a sentence &mdash; and compile it into each
+      backend's native conditioning through a small adapter. Because the representation is plugged into
+      the interfaces the backends were trained on rather than replacing them, the question we can
+      answer is whether the adapter costs anything, and we answer it by measurement rather than
+      assertion: with only the map channel swapped for MagicDrive's own raster, image quality is
+      statistically indistinguishable from the native conditioning on all six cameras and detection is
+      slightly better. On 6012 frames the compiled dataset is closer to real data than a matched
+      real-vs-real sample is to itself, and closer still at 150 frames per view, so the comparison does
+      not depend on the sample size at which it is made. The occupancy backend takes the representation
+      directly, its native input being the layout we already hold. We also use the representation to
+      construct long-tail scenarios with a traffic simulator &mdash; occluded crossings, truck cut-ins,
+      oncoming drift, night squeezes &mdash; each checked for clearance before it is rendered. Code,
+      adapters and scenarios are released.
+    </p>
+  </section>
+
+  <!-- ============================================================ method -->
+  <section id="method">
+    <h2>Method</h2>
+
+    <figure>
+      <img src="static/images/pipeline.png"
+           alt="Pipeline: three input types become one document, which adapters compile into the payload of an image, a video or an occupancy backend">
+      <figcaption>
+        <b>One document, three backends.</b> Inputs of different types are translated into a document;
+        an adapter compiles it into each backend's native payload; the payload is checked before
+        rendering. Stage 5 runs the path backwards, from a backend's output to a document.
+      </figcaption>
+    </figure>
+
+    <h3>Representation</h3>
+    <p>
+      A document is one frame in a single ego frame (<code>x</code> right, <code>y</code> forward,
+      <code>z</code> up, metres): the ego state and its intended path, actors as oriented boxes with
+      velocity, the map as polylines with a semantic kind, camera intrinsics and extrinsics, and the
+      environment. Every block is paired with a <em>modality mask</em> that records what the input
+      actually supplied, so a document states what it can and cannot fill before anything is compiled:
+      the same type describes a nuScenes annotation, a simulator frame, and a document made from a
+      sentence.
+    </p>
+
+    <h3>Adaptation</h3>
+    <p>
+      An adapter is a pure function from a document to a backend's payload, with no training and no
+      learned parameters. The map is rasterised into eight binary planes at 0.5&nbsp;m over
+      &plusmn;50&nbsp;m for MagicDrive; the same document is projected into a six-view clip with a
+      rendered HD-map canvas for DriveDreamer2; and it is voxelised into an
+      <code>18&times;200&times;200</code> layout over &plusmn;40&nbsp;m for UniScene, whose native slot
+      <em>is</em> that tensor &mdash; so for that backend the representation is the input rather than a
+      translation of it.
+    </p>
+
+    <h3>Verification</h3>
+    <p>
+      Before anything is rendered, every payload is checked against the backend's own capability:
+      shape and range, camera conventions against the backend's loader, and temporal consistency on the
+      rendered frames. A payload either compiles whole or is rejected with the reason, which is what
+      lets us treat the numbers below as a property of the representation rather than of a lucky run.
+    </p>
+  </section>
+
+  <!-- ============================================================ results -->
+  <section id="results">
+    <h2>Results</h2>
+
+    <h3>1. Long-tail scenarios, rendered end to end</h3>
+    <p class="note">
+      Each clip is 20 frames at 4&nbsp;fps across six views, rendered by the video backend from a single
+      document. None of the scenes exists in the dataset: they are constructed, simulated, checked for
+      clearance, and then rendered.
+    </p>
+
+    <div class="grid one">
+      <figure class="card">
+        <a href="static/videos/vid1.mp4" target="_blank" rel="noopener">
+          <video src="static/videos/vid1.mp4" poster="static/images/vid1.jpg" autoplay loop muted playsinline></video>
+        </a>
+        <p class="cap"><b>Snow, occluded crossing.</b> A pedestrian crosses behind a stopped vehicle.</p>
+      </figure>
+
+      <figure class="card">
+        <a href="static/videos/vid2.mp4" target="_blank" rel="noopener">
+          <video src="static/videos/vid2.mp4" poster="static/images/vid2.jpg" autoplay loop muted playsinline></video>
+        </a>
+        <p class="cap"><b>Rain, truck cut-in.</b> A truck cuts into the ego lane at close range.</p>
+      </figure>
+
+      <figure class="card">
+        <a href="static/videos/vid3.mp4" target="_blank" rel="noopener">
+          <video src="static/videos/vid3.mp4" poster="static/images/vid3.jpg" autoplay loop muted playsinline></video>
+        </a>
+        <p class="cap"><b>Fog, oncoming drift.</b> An oncoming car drifts across the centre line.</p>
+      </figure>
+
+      <figure class="card">
+        <a href="static/videos/vid4.mp4" target="_blank" rel="noopener">
+          <video src="static/videos/vid4.mp4" poster="static/images/vid4.jpg" autoplay loop muted playsinline></video>
+        </a>
+        <p class="cap"><b>Night, squeeze.</b> The ego is boxed in on both sides at night.</p>
+      </figure>
+
+      <figure class="card">
+        <a href="static/videos/vid7.mp4" target="_blank" rel="noopener">
+          <video src="static/videos/vid7.mp4" poster="static/images/vid7.jpg" autoplay loop muted playsinline></video>
+        </a>
+        <p class="cap"><b>Clear, pedestrian after.</b> A pedestrian steps out just after the ego passes.</p>
+      </figure>
+
+      <figure class="card">
+        <a href="static/videos/vid10.mp4" target="_blank" rel="noopener">
+          <video src="static/videos/vid10.mp4" poster="static/images/vid10.jpg" autoplay loop muted playsinline></video>
+        </a>
+        <p class="cap"><b>Dusk, slow crossing.</b> A slow crossing at dusk, low sun ahead.</p>
+      </figure>
+    </div>
+
+    <h3>2. The image backend, on the same documents</h3>
+    <p class="note">
+      Each frame is one document rendered by the image backend; the roads, the actors and the
+      weather come from the document, not from a caption.
+    </p>
+
+    <div class="grid two">
+      <figure class="card">
+        <img src="static/images/case1.jpg" alt="Night scene with rain and traffic cones">
+        <p class="cap"><b>Night, rain, cones.</b></p>
+      </figure>
+      <figure class="card">
+        <img src="static/images/case2.jpg" alt="Rain scene with a truck in the row ahead">
+        <p class="cap"><b>Rain, truck in row.</b></p>
+      </figure>
+      <figure class="card">
+        <img src="static/images/case3.jpg" alt="Fog scene with a stalled bus">
+        <p class="cap"><b>Fog, stalled bus.</b></p>
+      </figure>
+      <figure class="card">
+        <img src="static/images/case4.jpg" alt="Night scene with a bicycle">
+        <p class="cap"><b>Night, bicycle.</b></p>
+      </figure>
+      <figure class="card">
+        <img src="static/images/case5.jpg" alt="Sunset scene with backlight and roadworks">
+        <p class="cap"><b>Sunset, backlight.</b></p>
+      </figure>
+      <figure class="card">
+        <img src="static/images/sixview.jpg" alt="Six views of one document, arranged as a grid">
+        <p class="cap"><b>Six views, one document.</b> The same document rendered on all six cameras.</p>
+      </figure>
+    </div>
+
+    <h3>3. The occupancy backend</h3>
+    <p class="note">
+      UniScene's native slot is the layout tensor itself, so the document is compiled straight into it.
+    </p>
+
+    <div class="grid two">
+      <figure class="card">
+        <a href="static/videos/occ_virtual.mp4" target="_blank" rel="noopener">
+          <video src="static/videos/occ_virtual.mp4" poster="static/images/occ_virtual.jpg" autoplay loop muted playsinline></video>
+        </a>
+        <p class="cap"><b>Generated.</b> Rendered from the layout the document compiles to.</p>
+      </figure>
+      <figure class="card">
+        <a href="static/videos/occ_real.mp4" target="_blank" rel="noopener">
+          <video src="static/videos/occ_real.mp4" poster="static/images/occ_real.jpg" autoplay loop muted playsinline></video>
+        </a>
+        <p class="cap"><b>Recorded.</b> The real clip the layout was derived from, for reference.</p>
+      </figure>
+    </div>
+
+    <h3>4. Parity with the native conditioning</h3>
+    <p>
+      Only the map channel differs between the two arms; the frames, the seeds and the evaluators are
+      the same. Image quality is statistically indistinguishable on all six cameras, and detection is
+      slightly better, which is what we mean by the adapter costing nothing measurable.
+    </p>
+
+    <table>
+      <caption>
+        Table I. Parity against each backend's own native conditioning. Every KID carries a 95&#8239;%
+        bootstrap interval and all six per-camera pairs overlap; the paired bootstrap puts the mean
+        difference at +0.0009 with zero inside all six intervals.
+      </caption>
+      <thead>
+        <tr><th></th><th>Native</th><th>UniSIR</th></tr>
+      </thead>
+      <tbody>
+        <tr class="panel"><td colspan="3">A. Image quality &mdash; KID &darr;, n&nbsp;=&nbsp;150</td></tr>
+        <tr><td>CAM_FRONT</td><td>0.0216</td><td>0.0229</td></tr>
+        <tr><td>CAM_FRONT_LEFT</td><td>0.0151</td><td>0.0159</td></tr>
+        <tr><td>CAM_FRONT_RIGHT</td><td>0.0151</td><td>0.0161</td></tr>
+        <tr><td>CAM_BACK</td><td>0.0276</td><td>0.0286</td></tr>
+        <tr><td>CAM_BACK_LEFT</td><td>0.0164</td><td>0.0172</td></tr>
+        <tr><td>CAM_BACK_RIGHT</td><td>0.0229</td><td>0.0237</td></tr>
+        <tr class="panel"><td colspan="3">B. Perception &mdash; frozen BEVFormer, n&nbsp;=&nbsp;150</td></tr>
+        <tr><td>mAP &uarr;</td><td>0.1110</td><td>0.1197</td></tr>
+        <tr><td>NDS &uarr;</td><td>0.1829</td><td>0.1880</td></tr>
+        <tr class="panel"><td colspan="3">C. Occupancy &mdash; UniScene, 6012 frames</td></tr>
+        <tr><td>Occ3D mIoU &uarr;</td><td colspan="2">14.54</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5. Where the scenarios come from</h3>
+    <p>
+      A conflict is specified in words, simulated with a traffic simulator, checked for clearance and
+      heading, and written out as a document; the same document then renders in every backend. The
+      figure shows the loop on the scenarios above.
+    </p>
+    <figure>
+      <img src="static/images/longtail.png"
+           alt="Long-tail construction loop: specification, simulation, clearance check, document, rendering">
+      <figcaption>
+        <b>Construction, not collection.</b> Each scenario is specified, simulated and checked before
+        it is rendered; the check is what keeps a scenario physically plausible.
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================================================ bibtex -->
+  <section id="bibtex">
+    <h2>BibTeX</h2>
+    <p>If you find this work useful, please cite:</p>
+<pre><code>@inproceedings{unisir2027,
+  title     = {UniSIR: A Unified Representation for Driving-Scene Synthesis},
+  author    = {Anonymous submission},
+  booktitle = {IEEE Intelligent Vehicles Symposium (IV)},
+  year      = {2027}
+}</code></pre>
+  </section>
+
+  <footer>
+    Page layout adapted from the
+    <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> project page template.
+  </footer>
+</div>
+
+<script>
+// Play only what is on screen: six autoplaying clips at once is wasteful, and pausing the off-screen
+// ones keeps the page smooth while scrolling.
+(function () {
+  if (!('IntersectionObserver' in window)) return;
+  var vids = document.querySelectorAll('video');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      var v = e.target;
+      if (e.isIntersecting) { v.play().catch(function () {}); }
+      else { v.pause(); }
+    });
+  }, { rootMargin: '120px' });
+  vids.forEach(function (v) { io.observe(v); });
+})();
+</script>
+</body>
+</html>
