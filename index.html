@@ -162,40 +162,7 @@
 
     </div>
 
-    <h3>2. The image backend, on the same documents</h3>
-    <p class="note">
-      Each frame is one document rendered by the image backend; the roads, the actors and the
-      weather come from the document, not from a caption.
-    </p>
-
-    <div class="grid two">
-      <figure class="card">
-        <img src="static/images/case1.jpg" alt="Night scene with rain and traffic cones">
-        <p class="cap"><b>Night, rain, cones.</b></p>
-      </figure>
-      <figure class="card">
-        <img src="static/images/case2.jpg" alt="Rain scene with a truck in the row ahead">
-        <p class="cap"><b>Rain, truck in row.</b></p>
-      </figure>
-      <figure class="card">
-        <img src="static/images/case3.jpg" alt="Fog scene with a stalled bus">
-        <p class="cap"><b>Fog, stalled bus.</b></p>
-      </figure>
-      <figure class="card">
-        <img src="static/images/case4.jpg" alt="Night scene with a bicycle">
-        <p class="cap"><b>Night, bicycle.</b></p>
-      </figure>
-      <figure class="card">
-        <img src="static/images/case5.jpg" alt="Sunset scene with backlight and roadworks">
-        <p class="cap"><b>Sunset, backlight.</b></p>
-      </figure>
-      <figure class="card">
-        <img src="static/images/sixview.jpg" alt="Six views of one document, arranged as a grid">
-        <p class="cap"><b>Six views, one document.</b> The same document rendered on all six cameras.</p>
-      </figure>
-    </div>
-
-    <h3>3. The occupancy backend</h3>
+    <h3>2. The occupancy backend</h3>
     <p class="note">
       UniScene's native slot is the layout tensor itself, so the document is compiled straight into it.
     </p>
@@ -215,7 +182,7 @@
       </figure>
     </div>
 
-    <h3>4. Qualitative results</h3>
+    <h3>3. Qualitative results</h3>
     <p>
       The representation can also be used to construct scenes rather than translate them: a conflict
       is specified, simulated, written as a document, and rendered by whichever backend is available.
