@@ -34,11 +34,11 @@
     </figure>
 
     <p class="lead">
-      Driving-scene generators each consume their own conditioning: MagicDrive a rasterised
-      bird's-eye-view map with projected boxes, DriveDreamer2 a six-view clip with a rendered HD map,
-      UniScene a voxelised occupancy layout. UniSIR defines <em>one</em> representation that all three
-      accept, and translates whatever a practitioner already has &mdash; annotations, simulator files,
-      or a sentence &mdash; into it.
+      Driving-scene generators each consume their own conditioning: an image generator a rasterised
+      bird's-eye-view map with projected boxes, a video generator a multi-view clip with a rendered HD
+      map, an occupancy generator a voxelised layout. UniSIR defines <em>one</em> representation that
+      all three families accept, and translates whatever a practitioner already has &mdash;
+      annotations, simulator files, or a sentence &mdash; into it.
     </p>
   </header>
 
@@ -46,23 +46,16 @@
   <section id="abstract">
     <h2>Abstract</h2>
     <p>
-      Driving-scene generators each consume their own conditioning. MagicDrive takes a rasterised
-      bird's-eye-view map with projected boxes, DriveDreamer2 a six-view clip with a rendered HD map,
-      UniScene a voxelised occupancy layout. The scene a practitioner already has seldom arrives in any
-      of these forms. We define UniSIR, one scene representation, translate inputs of different types
-      into it &mdash; annotations, simulator files, or a sentence &mdash; and compile it into each
-      backend's native conditioning through a small adapter. Because the representation is plugged into
-      the interfaces the backends were trained on rather than replacing them, the question we can
+      Driving-scene generators each consume their own conditioning: an image generator a rasterised
+      bird's-eye-view map with projected boxes, a video generator a multi-view clip with a rendered HD
+      map, an occupancy generator a voxelised layout. The scene a practitioner already has seldom
+      arrives in any of these forms. We define UniSIR, one scene representation, translate inputs of
+      different types into it, namely annotations, simulator files, or a sentence, and compile it into
+      a backend's native conditioning through a small adapter. Because the representation is plugged
+      into the interfaces the backends were trained on rather than replacing them, the question we can
       answer is whether the adapter costs anything, and we answer it by measurement rather than
-      assertion: with only the map channel swapped for MagicDrive's own raster, image quality is
-      statistically indistinguishable from the native conditioning on all six cameras and detection is
-      slightly better. On 6012 frames the compiled dataset is closer to real data than a matched
-      real-vs-real sample is to itself, and closer still at 150 frames per view, so the comparison does
-      not depend on the sample size at which it is made. The occupancy backend takes the representation
-      directly, its native input being the layout we already hold. We also use the representation to
-      construct long-tail scenarios with a traffic simulator &mdash; occluded crossings, truck cut-ins,
-      oncoming drift, night squeezes &mdash; each checked for clearance before it is rendered. Code,
-      adapters and scenarios are released.
+      assertion: across an image, a video and an occupancy generator, the compiled conditioning is not
+      worse than each model's own. Code and adapters are released.
     </p>
   </section>
 
@@ -76,7 +69,8 @@
       <figcaption>
         <b>One document, three backends.</b> Inputs of different types are translated into a document;
         an adapter compiles it into each backend's native payload; the payload is checked before
-        rendering. Stage 5 runs the path backwards, from a backend's output to a document.
+        rendering. Stage 5 runs the path backwards: a conflict is specified and written as a
+        document, which is how the scenes under <em>Qualitative results</em> are produced.
       </figcaption>
     </figure>
 
@@ -95,11 +89,12 @@
     <p>
       An adapter is a pure function from a document to a backend's payload, with no training and no
       learned parameters. The map is rasterised into eight binary planes at 0.5&nbsp;m over
-      &plusmn;50&nbsp;m for MagicDrive; the same document is projected into a six-view clip with a
-      rendered HD-map canvas for DriveDreamer2; and it is voxelised into an
-      <code>18&times;200&times;200</code> layout over &plusmn;40&nbsp;m for UniScene, whose native slot
-      <em>is</em> that tensor &mdash; so for that backend the representation is the input rather than a
-      translation of it.
+      &plusmn;50&nbsp;m for the image backend; the same document is projected into a six-view clip
+      with a rendered HD-map canvas for the video backend; and it is voxelised into an
+      <code>18&times;200&times;200</code> layout over &plusmn;40&nbsp;m for the occupancy backend,
+      whose native slot <em>is</em> that tensor, so there the representation is the input rather than a
+      translation of it. The three implementations are representatives of their families, chosen for
+      convenience rather than scope.
     </p>
 
     <h3>Verification</h3>
@@ -256,10 +251,9 @@
     <h3>5. The generated dataset against a real-data ceiling</h3>
     <p>
       Both rows are measured through the identical protocol, against a real reference that has been
-      through the same crop-and-reconstruct as the generated frames. On the full 6012 frames the
-      compiled set is closer to real data than a matched real-vs-real sample is to itself, and it
-      stays closer at 150 frames per view, so the result does not depend on the sample size at which
-      it is measured.
+      through the same crop-and-reconstruct as the generated frames. The compiled set is closer to
+      real data than a matched real-vs-real sample is to itself, and the ordering does not change when
+      the comparison is repeated against a smaller reference.
     </p>
 
     <div class="tablewrap">
@@ -349,18 +343,21 @@
       median error of 32&nbsp;m.
     </p>
 
-    <h3>7. Where the scenarios come from</h3>
+    <h3>7. Qualitative results</h3>
     <p>
-      A conflict is specified in words, simulated with a traffic simulator, checked for clearance and
-      heading, and written out as a document; the same document then renders in every backend. The
-      figure shows the loop on the scenarios above.
+      The representation can also be used to construct scenes rather than translate them: a conflict
+      is specified, simulated, written as a document, and rendered by whichever backend is available.
+      The figure shows what that produces, with the body-to-body clearance at the closest frame.
     </p>
     <figure>
       <img src="static/images/longtail.png"
-           alt="Long-tail construction loop: specification, simulation, clearance check, document, rendering">
+           alt="Six constructed long-tail scenes, each annotated with the clearance at the closest frame">
       <figcaption>
-        <b>Construction, not collection.</b> Each scenario is specified, simulated and checked before
-        it is rendered; the check is what keeps a scenario physically plausible.
+        <b>Constructed, not collected.</b> A pedestrian crossing behind a hoarding in snow (0.67&nbsp;m);
+        a truck cutting in on wet road (1.30&nbsp;m); an oncoming vehicle drifting over the centre line
+        in fog (1.30&nbsp;m); a coned-off lane squeeze at night (1.52&nbsp;m); a pedestrian in dusk
+        (1.40&nbsp;m); a pedestrian who enters the ego lane after the ego has passed (0.57&nbsp;m). No
+        recording exists behind any of these frames.
       </figcaption>
     </figure>
   </section>
