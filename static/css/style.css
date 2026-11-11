@@ -39,14 +39,15 @@ h1 {
 }
 
 .authors { font-size: 1.05rem; margin: 0 0 4px; }
-.affil { color: var(--muted); font-size: 0.95rem; margin: 0 0 22px; }
+.affil { color: var(--muted); font-size: 0.95rem; margin: 0 0 4px; line-height: 1.45; }
+.affil:last-of-type { margin-bottom: 6px; }
 
 .links {
   display: flex;
   gap: 10px;
   justify-content: center;
   flex-wrap: wrap;
-  margin: 0 0 34px;
+  margin: 18px 0 34px;
 }
 
 .btn {
